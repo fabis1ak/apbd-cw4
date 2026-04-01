@@ -319,6 +319,14 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie16_NajwyzszaOcenaKazdegoStudenta()
     {
+        return DaneUczelni.Zapisy
+            .Where(z => z.OcenaKoncowa.HasValue)
+            .Join(DaneUczelni.Studenci, 
+                z => z.StudentId, 
+                s => s.Id, 
+                (z, s) => new { s.Imie, s.Nazwisko, Ocena = z.OcenaKoncowa.Value })
+            .GroupBy(x => new { x.Imie, x.Nazwisko })
+            .Select(g => $"{g.Key.Imie} {g.Key.Nazwisko} | Najwyższa ocena: {g.Max(x => x.Ocena)}");
         throw Niezaimplementowano(nameof(Zadanie16_NajwyzszaOcenaKazdegoStudenta));
     }
 
@@ -337,6 +345,14 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie01_StudenciZWiecejNizJednymAktywnymPrzedmiotem()
     {
+        return DaneUczelni.Zapisy
+            .Where(z => z.CzyAktywny)
+            .GroupBy(z => z.StudentId)
+            .Where(g => g.Count() > 1)
+            .Join(DaneUczelni.Studenci, 
+                g => g.Key, 
+                s => s.Id, 
+                (g, s) => $"{s.Imie} {s.Nazwisko} | Aktywne przedmioty: {g.Count()}");
         throw Niezaimplementowano(nameof(Wyzwanie01_StudenciZWiecejNizJednymAktywnymPrzedmiotem));
     }
 
@@ -354,6 +370,14 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie02_PrzedmiotyStartujaceWKwietniuBezOcenKoncowych()
     {
+        return DaneUczelni.Przedmioty
+            .Where(p => p.DataStartu.Year == 2026 && p.DataStartu.Month == 4)
+            .GroupJoin(DaneUczelni.Zapisy, 
+                p => p.Id, 
+                z => z.PrzedmiotId, 
+                (p, zapisy) => new { p.Nazwa, Zapisy = zapisy })
+            .Where(x => x.Zapisy.All(z => !z.OcenaKoncowa.HasValue))
+            .Select(x => x.Nazwa);
         throw Niezaimplementowano(nameof(Wyzwanie02_PrzedmiotyStartujaceWKwietniuBezOcenKoncowych));
     }
 
@@ -390,6 +414,14 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie04_MiastaILiczbaAktywnychZapisow()
     {
+        return DaneUczelni.Studenci
+            .Join(DaneUczelni.Zapisy.Where(z => z.CzyAktywny), 
+                s => s.Id, 
+                z => z.StudentId, 
+                (s, z) => s.Miasto)
+            .GroupBy(miasto => miasto)
+            .OrderByDescending(g => g.Count())
+            .Select(g => $"Miasto: {g.Key} | Liczba aktywnych zapisów: {g.Count()}");
         throw Niezaimplementowano(nameof(Wyzwanie04_MiastaILiczbaAktywnychZapisow));
     }
 
