@@ -272,6 +272,14 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie14_SredniaOcenaNaPrzedmiot()
     {
+        return DaneUczelni.Zapisy
+            .Where(z => z.OcenaKoncowa.HasValue)
+            .Join(DaneUczelni.Przedmioty, 
+                z => z.PrzedmiotId, 
+                p => p.Id, 
+                (z, p) => new { p.Nazwa, Ocena = z.OcenaKoncowa.Value })
+            .GroupBy(x => x.Nazwa)
+            .Select(g => $"Przedmiot: {g.Key} | Średnia ocen: {g.Average(x => x.Ocena):F2}");
         throw Niezaimplementowano(nameof(Zadanie14_SredniaOcenaNaPrzedmiot));
     }
 
@@ -288,6 +296,12 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie15_ProwadzacyILiczbaPrzedmiotow()
     {
+        return DaneUczelni.Prowadzacy
+            .GroupJoin(DaneUczelni.Przedmioty, 
+                pr => pr.Id, 
+                p => p.ProwadzacyId, 
+                (pr, przedmioty) => new { pr.Imie, pr.Nazwisko, LiczbaPrzedmiotow = przedmioty.Count() })
+            .Select(x => $"{x.Imie} {x.Nazwisko} | Prowadzonych przedmiotów: {x.LiczbaPrzedmiotow}");
         throw Niezaimplementowano(nameof(Zadanie15_ProwadzacyILiczbaPrzedmiotow));
     }
 
