@@ -224,6 +224,15 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie12_ParyStudentPrzedmiot()
     {
+        return DaneUczelni.Zapisy
+            .Join(DaneUczelni.Studenci, 
+                z => z.StudentId, 
+                s => s.Id, 
+                (z, s) => new { s.Imie, s.Nazwisko, z.PrzedmiotId })
+            .Join(DaneUczelni.Przedmioty, 
+                sz => sz.PrzedmiotId, 
+                p => p.Id, 
+                (sz, p) => $"{sz.Imie} {sz.Nazwisko} uczęszcza na: {p.Nazwa}");
         throw Niezaimplementowano(nameof(Zadanie12_ParyStudentPrzedmiot));
     }
 
@@ -239,6 +248,13 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie13_GrupowanieZapisowWedlugPrzedmiotu()
     {
+        return DaneUczelni.Zapisy
+            .Join(DaneUczelni.Przedmioty,
+                z => z.PrzedmiotId,
+                p  => p.Id,
+                (z,p) => new {p.Nazwa})
+            .GroupBy(x => x.Nazwa)
+            .Select(g => $"Przedmiot: {g.Key} | Liczba zapisów: {g.Count()}");
         throw Niezaimplementowano(nameof(Zadanie13_GrupowanieZapisowWedlugPrzedmiotu));
     }
 
